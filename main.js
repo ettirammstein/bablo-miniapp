@@ -7,7 +7,7 @@ const connectBtn = document.getElementById('connect-btn');
 const svg = document.getElementById('tree-svg');
 const treeContent = document.getElementById('tree-content');
 
-// Показать username в правом верхнем углу
+// Показываем логин в правом верхнем углу
 if (tg.initDataUnsafe?.user) {
   const u = tg.initDataUnsafe.user;
   userLabel.textContent = `@${u.username || u.id}`;
@@ -16,7 +16,7 @@ if (tg.initDataUnsafe?.user) {
 // URL Vercel-бэкенда
 const API_URL = 'https://v0-bablo3000.vercel.app/api/index';
 
-// Демонстрационное реф-дерево
+// Демонстрационное реф‑дерево
 function drawDemoTree() {
   svg.setAttribute('viewBox', '-100 -100 200 200');
 
@@ -51,35 +51,29 @@ function drawDemoTree() {
 
 // Простейший зум по колесу
 let zoom = 1;
-svg.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  zoom *= e.deltaY < 0 ? 0.9 : 1.1;
-  const size = 200 * zoom;
-  svg.setAttribute('viewBox', `${-size / 2} ${-size / 2} ${size} ${size}`);
-}, { passive: false });
+svg.addEventListener(
+  'wheel',
+  (e) => {
+    e.preventDefault();
+    zoom *= e.deltaY < 0 ? 0.9 : 1.1;
+    const size = 200 * zoom;
+    svg.setAttribute('viewBox', `${-size / 2} ${-size / 2} ${size} ${size}`);
+  },
+  { passive: false }
+);
 
-// Заглушка подключения HOT-кошелька
-async function connectHotWallet() {
-  // Если SDK уже инжектнул кошелёк
-  if (window.HOT && window.HOT.wallet && window.HOT.wallet.address) {
-    return window.HOT.wallet.address;
-  }
-
-  // Если есть метод connect (дальше по доке HOT донастроишь)
-  if (window.HOT && typeof window.HOT.connect === 'function') {
-    const wallet = await window.HOT.connect();
-    return wallet.address;
-  }
-
-  tg.showAlert('HOT SDK недоступен. Обнови приложение или попробуй позже.');
-  throw new Error('HOT SDK not found');
+// Заглушка адреса HOT-кошелька,
+// пока не прикручен реальный HOT SDK
+async function getHotWalletPlaceholder(telegramId) {
+  // здесь потом будет вызов HOT SDK
+  return `hot-placeholder-${telegramId}`;
 }
 
-// Кнопка «Подключить testnet кошелёк» (пока регистрируем HOT и TG)
+// Кнопка: регистрируем юзера в очереди через Vercel
 connectBtn.addEventListener('click', async () => {
   try {
     connectBtn.disabled = true;
-    connectBtn.textContent = 'Подключаем кошелёк…';
+    connectBtn.textContent = 'Подключаем…';
 
     const user = tg.initDataUnsafe?.user;
     if (!user) {
@@ -87,7 +81,7 @@ connectBtn.addEventListener('click', async () => {
       return;
     }
 
-    const hotWallet = await connectHotWallet();
+    const hotWallet = await getHotWalletPlaceholder(user.id);
 
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -106,7 +100,8 @@ connectBtn.addEventListener('click', async () => {
 
     const data = await res.json();
 
-    const msg = `Кошелёк подключён.
+    const msg = `Регистрация в очереди:
+ID: ${user.id}
 Очередь: #${data.position || '?'}
 Уровень: ${data.tier || '—'}`;
     tg.showAlert(msg);
@@ -114,7 +109,7 @@ connectBtn.addEventListener('click', async () => {
     connectBtn.textContent = 'Кошелёк подключён';
   } catch (e) {
     console.error(e);
-    tg.showAlert('Не удалось подключить кошелёк. Попробуй ещё раз.');
+    tg.showAlert('Не удалось подключить. Попробуй ещё раз.');
     connectBtn.textContent = 'Подключить testnet кошелёк';
   } finally {
     connectBtn.disabled = false;
