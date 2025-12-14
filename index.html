@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>BABLO Mini App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Telegram Mini Apps SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script> <!-- важно для Mini App [web:182] -->
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>БАБЛО</h1>
+      <span id="user-label"></span>
+    </header>
+
+    <!-- SVG‑сцена под бесконечный зум реф‑дерева -->
+    <div id="svg-wrapper">
+      <svg id="tree-svg">
+        <g id="tree-content">
+          <!-- сюда main.js будет добавлять ноды/линии -->
+        </g>
+      </svg>
+    </div>
+
+    <button id="connect-btn">Подключить testnet кошелёк</button>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
