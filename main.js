@@ -3,6 +3,7 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 const userLabel = document.getElementById('user-label');
+const walletLabel = document.getElementById('wallet-label');
 const connectBtn = document.getElementById('connect-btn');
 const svg = document.getElementById('tree-svg');
 const treeContent = document.getElementById('tree-content');
@@ -69,8 +70,20 @@ async function getHotWalletPlaceholder(telegramId) {
   return `hot-placeholder-${telegramId}`;
 }
 
-// Кнопка: регистрируем юзера в очереди через Vercel
+// ---------- ЛОГИКА КНОПКИ: СТАРТ → ЗАНЯТЬ ОЧЕРЕДЬ ----------
+
+let registered = false;
+
+// один обработчик, переключающийся по состоянию
 connectBtn.addEventListener('click', async () => {
+  if (!registered) {
+    await handleStart();
+  } else {
+    await handleJoinTestnet();
+  }
+});
+
+async function handleStart() {
   try {
     connectBtn.disabled = true;
     connectBtn.textContent = 'Подключаем…';
@@ -95,25 +108,34 @@ connectBtn.addEventListener('click', async () => {
     });
 
     if (!res.ok) {
-      throw new Error('API error: ' + res.status);
+      throw new Error('API error: ' + (await res.text()));
     }
 
     const data = await res.json();
 
-    const msg = `Регистрация в очереди:
+    // показываем адрес под ником
+    walletLabel.textContent = hotWallet;
+
+    const msg = `Ты в очереди предстарта.
 ID: ${user.id}
 Очередь: #${data.position || '?'}
 Уровень: ${data.tier || '—'}`;
     tg.showAlert(msg);
 
-    connectBtn.textContent = 'Кошелёк подключён';
+    registered = true;
+    connectBtn.textContent = 'Занять очередь в Testnet';
   } catch (e) {
     console.error(e);
     tg.showAlert('Не удалось подключить. Попробуй ещё раз.');
-    connectBtn.textContent = 'Подключить testnet кошелёк';
+    connectBtn.textContent = 'СТАРТ';
   } finally {
     connectBtn.disabled = false;
   }
-});
+}
+
+// Заглушка под контракт testnet
+async function handleJoinTestnet() {
+  tg.showAlert('Тут будет вызов контракта Testnet и оплата уровня (заглушка).');
+}
 
 drawDemoTree();
