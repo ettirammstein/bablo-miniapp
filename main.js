@@ -39,7 +39,7 @@ function drawDemoTree() {
   }
 
   treeContent.append(line1, line2,
-    circle(0, 0, '#FFD54F'),
+    circle(0, 0, '#22c55e'),
     circle(-50, 60, '#4FC3F7'),
     circle(50, 60, '#4FC3F7')
   );
